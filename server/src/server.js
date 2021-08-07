@@ -4,8 +4,6 @@ const app = express();
 require('dotenv').config({ path: '../../.env' });
 const errorHandler = require('_middleware/error-handler');
 
-console.log(process.env);
-
 const port = 3000;
 
 // api routes
