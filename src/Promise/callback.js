@@ -1,5 +1,5 @@
-const api = require('./api');
-const http = require('./http');
+const api = require('./libs/apiNormal');
+const http = require('./libs/http');
 
 api.getUser('user 1', function(err, user) {
     if (err) throw err;
@@ -11,7 +11,7 @@ api.getUser('user 1', function(err, user) {
         console.log(posts);
         api.getCommentsOfPosts(posts, function(err, comments) {
             console.log("comments");
-            console.log(comments);                
-        });  
+            console.log(comments);
+        });
     });
 });
