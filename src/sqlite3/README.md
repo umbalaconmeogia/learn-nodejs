@@ -24,7 +24,7 @@ npm install
 
 To create database (it will delete the old *userPostComment.sqlite* file), run
 ```shell
-node createData
+node createDataPromise
 ```
 
 ## List data in the database

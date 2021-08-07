@@ -4,7 +4,7 @@ const fs = require('fs');
 class SqliteDb {
 
     constructor(databaseName, create) {
-        const databaseFileName = `./${databaseName}.sqlite`;
+        const databaseFileName = `./data/${databaseName}.sqlite`;
 
         if (create) {
             // Delete db file

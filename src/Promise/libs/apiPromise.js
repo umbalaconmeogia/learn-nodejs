@@ -6,9 +6,12 @@ module.exports = {
     getCommentsOfPosts
 };
 
-function getUser(username, callback) {
-    http.get('getUser', function(err, result) {
-        callback(err, 'user 1');
+function getUser(username) {
+    return new Promise((resolve, reject) => {
+        http.get('getUser', function(err, result) {
+            callback(err, 'user 1');
+        });
+
     });
 }
 
