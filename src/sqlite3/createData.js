@@ -56,58 +56,68 @@ function createTables() {
 
 function creatUsers() {
     for (let userNo = 1; userNo <= USER_NUM; userNo++) {
-        var userName = `User ${userNo}`;
-        db.serialize(() => {
-            db.run(`INSERT INTO user(name) VALUES(?)`, [userName], async function(err) {
-                if (err) {
-                    return console.log(err.message);
-                }
-                // Get the last insert id
-                let userId = this.lastID;
-                console.log(`User ${userName} is created. Id = ${userId}`);
-                await createUserPosts(userNo, userId);
+        queryCreateUser(userNo)
+            .then(userId => {
+                createUserPosts(userId, userNo);
+            })
+            .catch(err => {
+                throw err
             });
-        });
     }
 }
 
-function createUser(userNo) {
-    return new Promise((resolve, reject) => {
+function createUserPosts(userId, userNo) {
+    for (let postNo = 1; postNo <= POST_NUM; postNo++) {
+        queryCreatePost(userId, userNo, postNo)
+            .then(postId => {
+                createUserPostComments(postId, userNo, postNo);
+            });
+    }
+}
 
+function createUserPostComments(postId, userNo, postNo) {
+    for (let commentNo = 1; commentNo <= POST_NUM; commentNo++) {
+        queryCreateComment(postId, userNo, postNo, commentNo);
+    }
+}
+
+function queryCreateUser(userNo) {
+    return new Promise((resolve, reject) => {
+        var userName = `User ${userNo}`;
+        db.run(`INSERT INTO user(name) VALUES(?)`, [userName], async function(err) {
+            if (err) reject(err);
+            // Get the last insert id
+            let userId = this.lastID;
+            console.log(`User ${userName} is created. Id = ${userId}`);
+            resolve(userId);
+        });
     });
 }
 
-async function createUserPosts(userNo, userId) {
-    for (let postNo = 1; postNo <= POST_NUM; postNo++) {
+function queryCreatePost(userId, userNo, postNo) {
+    return new Promise((resolve, reject) => {
         var content = `Post ${userNo}.${postNo}`;
-        db.serialize(() => {
-            db.run(`INSERT INTO post(user_id, content) VALUES(?, ?)`, [userId, content], function(err) {
-                if (err) {
-                    return console.log(err.message);
-                }
-                // Get the last insert id
-                let postId = this.lastID;
-                console.log(`Post ${content} is created. Id = ${postId}`);
-                createUserPostComments(userNo, postNo, postId);
-            });
+        db.run(`INSERT INTO post(user_id, content) VALUES(?, ?)`, [userId, content], function(err) {
+            if (err) reject(err);
+            // Get the last insert id
+            let postId = this.lastID;
+            console.log(`Post ${content} is created. Id = ${postId}`);
+            resolve(postId);
         });
-    }
+    });
 }
 
-function createUserPostComments(userNo, postNo, postId) {
-    for (let commentNo = 1; commentNo <= POST_NUM; commentNo++) {
+function queryCreateComment(postId, userNo, postNo, commentNo) {
+    return new Promise((resolve, reject) => {
         var content = `Comment ${userNo}.${postNo}.${commentNo}`;
-        db.serialize(() => {
-            db.run(`INSERT INTO comment(post_id, content) VALUES(?, ?)`, [postId, content], function(err) {
-                if (err) {
-                    return console.log(err.message);
-                }
-                // Get the last insert id
-                let commentId = this.lastID;
-                console.log(`Post ${content} is created. Id = ${commentId}`);
-            });
+        db.run(`INSERT INTO comment(post_id, content) VALUES(?, ?)`, [postId, content], function(err) {
+            if (err) reject(err);
+            // Get the last insert id
+            let commentId = this.lastID;
+            console.log(`Comment ${content} is created. Id = ${commentId}`);
+            resolve(commentId);
         });
-    }
+    });
 }
 
 connectDb();
