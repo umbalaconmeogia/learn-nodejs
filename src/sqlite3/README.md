@@ -13,16 +13,25 @@ user
 
 The database is stored in file named *userPostComment.sqlite*.
 
-## Run
+## Install
 
 First, install nodejs dependencies.
 ```shell
 npm install
 ```
 
+## Create database (with data imported)
+
 To create database (it will delete the old *userPostComment.sqlite* file), run
 ```shell
 node createData
+```
+
+## List data in the database
+
+To list data of all tables in the database, run
+```shell
+node listData
 ```
 
 ## References
