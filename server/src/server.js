@@ -8,6 +8,8 @@ const port = 3000;
 
 // api routes
 app.use('/users', require('./users/users.controller'));
+app.use('/posts', require('./posts/posts.controller'));
+app.use('/comments', require('./comments/comments.controller'));
 
 // global error handler
 app.use(errorHandler);
