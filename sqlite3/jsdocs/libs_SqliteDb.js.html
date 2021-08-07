@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>libs/SqliteDb.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <li class="nav-link nav-home-link"><a href="index.html">Home</a></li><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="SqliteDb.html">SqliteDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#.connectDb">connectDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#.createDb">createDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#closeDb">closeDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#createTables">createTables</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#listTable">listTable</a></span></li><li class="nav-heading"><a href="global.html">Globals</a></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#createComments">createComments</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#createPosts">createPosts</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#creatUsers">creatUsers</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#queryCreateComment">queryCreateComment</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#queryCreatePost">queryCreatePost</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#queryCreateUser">queryCreateUser</a></span></li>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">libs/SqliteDb.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>const sqlite3 = require('sqlite3').verbose();
+const fs = require('fs');
+
+/**
+ * Utility to access to sqlite3 database.
+ *
+ * The normal usage of this class
+ * ```js
+ * const databaseName = 'myDatabase';
+ * var sqlite = SqliteDb.connectDb(databaseName); // Connect to the database.
+ * sqlite.db.run(sql, [params], callback); // Access to the sqlite database.
+ * sqlite.closeDb();
+ * ```
+ *
+ * To create new database (including delete old one)
+ * ```js
+ * const databaseName = 'myDatabase';
+ * var sqlite = SqliteDb.createDb(databaseName); // Create and connect to the database.
+ * ```
+ */
+class SqliteDb {
+
+    /**
+     * Connect to the database.
+     *
+     * This may create new database (including create tables) if specified.
+     * @constructor
+     * @param {string} databaseName The name of database, which is stored in file data/&lt;databaseName>.sqlite.
+     * @param {boolean} create Create the database or not.
+     */
+    constructor(databaseName, create) {
+        const databaseFileName = `./data/${databaseName}.sqlite`;
+
+        if (create) {
+            // Delete db file
+            console.log(`Delete file ${databaseFileName}`);
+            fs.unlinkSync(databaseFileName);
+        }
+
+        // Open the database
+        this.db = new sqlite3.Database(databaseFileName, (err) => {
+            if (err) {
+                console.error(err.message);
+            }
+            console.log(`Connected to the ${databaseName} database.`);
+        });
+
+        if (create) {
+            this.createTables();
+        }
+    }
+
+    /**
+     * Create all tables schema on new database.
+     */
+    createTables() {
+        console.log("Create tables.");
+        this.db.serialize(() => {
+            this.db.run(`CREATE TABLE user(
+                id INTEGER PRIMARY KEY,
+                name TEXT
+            )`);
+            this.db.run(`CREATE TABLE post(
+                id INTEGER PRIMARY KEY,
+                user_id INTEGER,
+                content TEXT
+            )`);
+            this.db.run(`CREATE TABLE comment(
+                id INTEGER PRIMARY KEY,
+                post_id INTEGER,
+                content TEXT
+            )`);
+        });
+    }
+
+    /**
+     * Connect to the database.
+     * @param {string} databaseName The name of database, which is stored in file data/&lt;databaseName>.sqlite.
+     */
+    static createDb(databaseName) {
+        return new SqliteDb(databaseName, true);
+    }
+
+    /**
+     * Connect to the database.
+     * @param {string} databaseName The name of database, which is stored in file data/&lt;databaseName>.sqlite.
+     */
+     static connectDb(databaseName) {
+        return new SqliteDb(databaseName, false);
+    }
+
+    /**
+     * Close connection to the database.
+     */
+    closeDb() {
+        // Close the database connection
+        this.db.close((err) => {
+            if (err) {
+                console.error(err.message);
+            }
+            console.log('Close the database connection.');
+        });
+    }
+
+    /**
+     * List a database table to console.
+     * @param {string} tableName
+     */
+    listTable(tableName) {
+        this.db.all(`SELECT * FROM ${tableName}`, function(err, rows) {
+            if (err) {
+                console.error(err.message);
+            }
+            console.log(`Table "${tableName}"`);
+            console.table(rows);
+        });
+    }
+}
+
+module.exports = SqliteDb;</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Sun Aug 08 2021 07:22:11 GMT+0900 (日本標準時) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>

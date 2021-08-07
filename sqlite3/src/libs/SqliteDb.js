@@ -22,6 +22,9 @@ class SqliteDb {
 
     /**
      * Connect to the database.
+     *
+     * This may create new database (including create tables) if specified.
+     * @constructor
      * @param {string} databaseName The name of database, which is stored in file data/<databaseName>.sqlite.
      * @param {boolean} create Create the database or not.
      */

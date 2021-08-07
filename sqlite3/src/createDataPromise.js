@@ -3,12 +3,16 @@ const SqliteDb = require('./libs/SqliteDb');
 
 const sqlite = SqliteDb.createDb(process.env.USER_POST_COMMENT_DBNAME);
 
-function creatUsers(previousContentNos) {
+/**
+ * Create user records in *user* table.
+ */
+function creatUsers() {
+    let previousContentNos = [];
     for (let userNo = 1; userNo <= process.env.USER_NUM; userNo++) {
         let nextContentNos = previousContentNos.concat([userNo]);
         queryCreateUser(nextContentNos)
             .then(userId => {
-                createUserPosts(userId, nextContentNos);
+                createPosts(userId, nextContentNos);
             })
             .catch(err => {
                 throw err
@@ -16,17 +20,27 @@ function creatUsers(previousContentNos) {
     }
 }
 
-function createUserPosts(userId, previousContentNos) {
+/**
+ * Create post records in *post* table.
+ * @param {int} userId
+ * @param {string[]} previousContentNos List of user number, used for generating string content.
+ */
+function createPosts(userId, previousContentNos) {
     for (let postNo = 1; postNo <= process.env.POST_NUM; postNo++) {
         let nextContentNos = previousContentNos.concat([postNo]);
         queryCreatePost(userId, nextContentNos)
             .then(postId => {
-                createUserPostComments(postId, nextContentNos);
+                createComments(postId, nextContentNos);
             });
     }
 }
 
-function createUserPostComments(postId, previousContentNos) {
+/**
+ * Create comment records in *comment* table.
+ * @param {int} postId
+ * @param {string[]} previousContentNos List of user/post number, used for generating string content.
+ */
+ function createComments(postId, previousContentNos) {
     for (let commentNo = 1; commentNo <= process.env.COMMENT_NUM; commentNo++) {
         let nextContentNos = previousContentNos.concat([commentNo]);
         queryCreateComment(postId, nextContentNos)
@@ -38,8 +52,7 @@ function createUserPostComments(postId, previousContentNos) {
 
 /**
  * Create a user in DB.
- * @param {Array<Integer>} contentNos Array of numbers used to generate content.
- * @returns
+ * @param {int[]} contentNos Array of numbers used to generate content.
  */
 function queryCreateUser(contentNos) {
     return new Promise((resolve, reject) => {
@@ -54,7 +67,11 @@ function queryCreateUser(contentNos) {
     });
 }
 
-function queryCreatePost(userId, contentNos) {
+/**
+ * Create a user in DB.
+ * @param {int[]} contentNos Array of numbers used to generate content.
+ */
+ function queryCreatePost(userId, contentNos) {
     return new Promise((resolve, reject) => {
         let content = 'Post ' + contentNos.join('.');
         sqlite.db.run(`INSERT INTO post(user_id, content) VALUES(?, ?)`, [userId, content], function(err) {
@@ -67,7 +84,12 @@ function queryCreatePost(userId, contentNos) {
     });
 }
 
-function queryCreateComment(postId, contentNos) {
+/**
+ * Create a user in DB.
+ * @param {int} postId
+ * @param {int[]} contentNos Array of numbers used to generate content.
+ */
+ function queryCreateComment(postId, contentNos) {
     return new Promise((resolve, reject) => {
         let content = 'Comment ' + contentNos.join('.');
         sqlite.db.run(`INSERT INTO comment(post_id, content) VALUES(?, ?)`, [postId, content], function(err) {
@@ -80,5 +102,5 @@ function queryCreateComment(postId, contentNos) {
     });
 }
 
-creatUsers([]);
+creatUsers();
 sqlite.closeDb();

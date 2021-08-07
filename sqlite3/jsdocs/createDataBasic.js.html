@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>createDataBasic.js - Documentation</title>
+
+    <script src="scripts/prettify/prettify.js"></script>
+    <script src="scripts/prettify/lang-css.js"></script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+<body>
+
+<input type="checkbox" id="nav-trigger" class="nav-trigger" />
+<label for="nav-trigger" class="navicon-button x">
+  <div class="navicon"></div>
+</label>
+
+<label for="nav-trigger" class="overlay"></label>
+
+<nav>
+    <li class="nav-link nav-home-link"><a href="index.html">Home</a></li><li class="nav-heading">Classes</li><li class="nav-heading"><span class="nav-item-type type-class">C</span><span class="nav-item-name"><a href="SqliteDb.html">SqliteDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#.connectDb">connectDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#.createDb">createDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#closeDb">closeDb</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#createTables">createTables</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="SqliteDb.html#listTable">listTable</a></span></li><li class="nav-heading"><a href="global.html">Globals</a></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#createComments">createComments</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#createPosts">createPosts</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#creatUsers">creatUsers</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#queryCreateComment">queryCreateComment</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#queryCreatePost">queryCreatePost</a></span></li><li class="nav-item"><span class="nav-item-type type-function">F</span><span class="nav-item-name"><a href="global.html#queryCreateUser">queryCreateUser</a></span></li>
+</nav>
+
+<div id="main">
+    
+    <h1 class="page-title">createDataBasic.js</h1>
+    
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>require('dotenv').config({ path: '../../.env' });
+const SqliteDb = require('./libs/SqliteDb');
+
+const sqlite = SqliteDb.createDb(process.env.USER_POST_COMMENT_DBNAME);
+
+/**
+ * Create user records in *user* table.
+ */
+function creatUsers() {
+    let previousContentNos = [];
+    for (let userNo = 1; userNo &lt;= process.env.USER_NUM; userNo++) {
+        let nextContentNos = previousContentNos.concat([userNo]);
+        let name = 'User ' + nextContentNos.join('.');
+        sqlite.db.run(`INSERT INTO user(name) VALUES(?)`, [name], async function(err) {
+            if (err) {
+                return console.log(err.message);
+            }
+            // Get the last insert id
+            let userId = this.lastID;
+            console.log(`User "${name}" is created. Id = ${userId}`);
+            createPosts(userId, nextContentNos);
+        });
+    }
+}
+
+/**
+ * Create post records in *post* table.
+ * @param {int} userId
+ * @param {string[]} previousContentNos List of user number, used for generating string content.
+ */
+function createPosts(userId, previousContentNos) {
+    for (let postNo = 1; postNo &lt;= process.env.POST_NUM; postNo++) {
+        let nextContentNos = previousContentNos.concat([postNo]);
+        let content = 'Post ' + nextContentNos.join('.');
+        sqlite.db.run(`INSERT INTO post(user_id, content) VALUES(?, ?)`, [userId, content], function(err) {
+            if (err) {
+                return console.log(err.message);
+            }
+            // Get the last insert id
+            let postId = this.lastID;
+            console.log(`Post "${content}" is created. Id = ${postId}`);
+            createComments(postId, nextContentNos);
+        });
+    }
+}
+
+/**
+ * Create comment records in *comment* table.
+ * @param {int} postId
+ * @param {string[]} previousContentNos List of user/post number, used for generating string content.
+ */
+function createComments(postId, previousContentNos) {
+    for (let commentNo = 1; commentNo &lt;= process.env.COMMENT_NUM; commentNo++) {
+        let nextContentNos = previousContentNos.concat([commentNo]);
+        let content = 'Comment ' + nextContentNos.join('.');
+        sqlite.db.run(`INSERT INTO comment(post_id, content) VALUES(?, ?)`, [postId, content], function(err) {
+            if (err) {
+                return console.log(err.message);
+            }
+            // Get the last insert id
+            let commentId = this.lastID;
+            console.log(`Comment "${content}" is created. Id = ${commentId}`);
+        });
+    }
+}
+
+creatUsers();
+sqlite.closeDb();</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<br class="clear">
+
+<footer>
+    Generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.6.7</a> on Sun Aug 08 2021 07:22:11 GMT+0900 (日本標準時) using the Minami theme.
+</footer>
+
+<script>prettyPrint();</script>
+<script src="scripts/linenumber.js"></script>
+</body>
+</html>
