@@ -13,6 +13,8 @@ user
 
 The database is stored in file named *userPostComment.sqlite*.
 
+All commands below should be run from *src* directory.
+
 ## Install
 
 First, install nodejs dependencies.
@@ -34,9 +36,7 @@ To list data of all tables in the database, run
 node listData
 ```
 
-<details>
-    <summary>It will show data as below
-    </summary>
+It will show data as below
 ```
 Table "user"
 ┌─────────┬────┬──────────┐
@@ -86,7 +86,6 @@ Table "comment"
 │   23    │ 24 │    5    │ 'Comment 1.2.4' │
 └─────────┴────┴─────────┴─────────────────┘
 ```
-</details>
 
 ## References
 
