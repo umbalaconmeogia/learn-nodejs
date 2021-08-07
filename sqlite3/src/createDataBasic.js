@@ -1,14 +1,10 @@
+require('dotenv').config({ path: '../../.env' });
 const SqliteDb = require('./libs/SqliteDb');
 
-const databaseName = 'userPostComment';
-const sqlite = new SqliteDb(databaseName, true);
-
-const USER_NUM = 2;
-const POST_NUM = 3;
-const COMMENT_NUM = 4;
+const sqlite = SqliteDb.createDb(process.env.USER_POST_COMMENT_DBNAME);
 
 function creatUsers(previousContentNos) {
-    for (let userNo = 1; userNo <= USER_NUM; userNo++) {
+    for (let userNo = 1; userNo <= process.env.USER_NUM; userNo++) {
         let nextContentNos = previousContentNos.concat([userNo]);
         let name = 'User ' + nextContentNos.join('.');
         sqlite.db.run(`INSERT INTO user(name) VALUES(?)`, [name], async function(err) {
@@ -24,7 +20,7 @@ function creatUsers(previousContentNos) {
 }
 
 function createUserPosts(userId, previousContentNos) {
-    for (let postNo = 1; postNo <= POST_NUM; postNo++) {
+    for (let postNo = 1; postNo <= process.env.POST_NUM; postNo++) {
         let nextContentNos = previousContentNos.concat([postNo]);
         let content = 'Post ' + nextContentNos.join('.');
         sqlite.db.run(`INSERT INTO post(user_id, content) VALUES(?, ?)`, [userId, content], function(err) {
@@ -40,7 +36,7 @@ function createUserPosts(userId, previousContentNos) {
 }
 
 function createUserPostComments(postId, previousContentNos) {
-    for (let commentNo = 1; commentNo <= COMMENT_NUM; commentNo++) {
+    for (let commentNo = 1; commentNo <= process.env.COMMENT_NUM; commentNo++) {
         let nextContentNos = previousContentNos.concat([commentNo]);
         let content = 'Comment ' + nextContentNos.join('.');
         sqlite.db.run(`INSERT INTO comment(post_id, content) VALUES(?, ?)`, [postId, content], function(err) {
@@ -55,4 +51,4 @@ function createUserPostComments(postId, previousContentNos) {
 }
 
 creatUsers([]);
-sqlite.close();
+sqlite.closeDb();

@@ -1,14 +1,10 @@
+require('dotenv').config({ path: '../../.env' });
 const SqliteDb = require('./libs/SqliteDb');
 
-const databaseName = 'userPostComment';
-const sqlite = new SqliteDb(databaseName, true);
-
-const USER_NUM = 2;
-const POST_NUM = 3;
-const COMMENT_NUM = 4;
+const sqlite = SqliteDb.createDb(process.env.USER_POST_COMMENT_DBNAME);
 
 function creatUsers(previousContentNos) {
-    for (let userNo = 1; userNo <= USER_NUM; userNo++) {
+    for (let userNo = 1; userNo <= process.env.USER_NUM; userNo++) {
         let nextContentNos = previousContentNos.concat([userNo]);
         queryCreateUser(nextContentNos)
             .then(userId => {
@@ -21,7 +17,7 @@ function creatUsers(previousContentNos) {
 }
 
 function createUserPosts(userId, previousContentNos) {
-    for (let postNo = 1; postNo <= POST_NUM; postNo++) {
+    for (let postNo = 1; postNo <= process.env.POST_NUM; postNo++) {
         let nextContentNos = previousContentNos.concat([postNo]);
         queryCreatePost(userId, nextContentNos)
             .then(postId => {
@@ -31,7 +27,7 @@ function createUserPosts(userId, previousContentNos) {
 }
 
 function createUserPostComments(postId, previousContentNos) {
-    for (let commentNo = 1; commentNo <= COMMENT_NUM; commentNo++) {
+    for (let commentNo = 1; commentNo <= process.env.COMMENT_NUM; commentNo++) {
         let nextContentNos = previousContentNos.concat([commentNo]);
         queryCreateComment(postId, nextContentNos)
             .then(commentId => {
@@ -85,4 +81,4 @@ function queryCreateComment(postId, contentNos) {
 }
 
 creatUsers([]);
-sqlite.close();
+sqlite.closeDb();

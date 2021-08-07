@@ -1,8 +1,30 @@
 const sqlite3 = require('sqlite3').verbose();
 const fs = require('fs');
 
+/**
+ * Utility to access to sqlite3 database.
+ *
+ * The normal usage of this class
+ * ```js
+ * const databaseName = 'myDatabase';
+ * var sqlite = SqliteDb.connectDb(databaseName); // Connect to the database.
+ * sqlite.db.run(sql, [params], callback); // Access to the sqlite database.
+ * sqlite.closeDb();
+ * ```
+ *
+ * To create new database (including delete old one)
+ * ```js
+ * const databaseName = 'myDatabase';
+ * var sqlite = SqliteDb.createDb(databaseName); // Create and connect to the database.
+ * ```
+ */
 class SqliteDb {
 
+    /**
+     * Connect to the database.
+     * @param {string} databaseName The name of database, which is stored in file data/<databaseName>.sqlite.
+     * @param {boolean} create Create the database or not.
+     */
     constructor(databaseName, create) {
         const databaseFileName = `./data/${databaseName}.sqlite`;
 
@@ -25,6 +47,9 @@ class SqliteDb {
         }
     }
 
+    /**
+     * Create all tables schema on new database.
+     */
     createTables() {
         console.log("Create tables.");
         this.db.serialize(() => {
@@ -45,7 +70,26 @@ class SqliteDb {
         });
     }
 
-    close() {
+    /**
+     * Connect to the database.
+     * @param {string} databaseName The name of database, which is stored in file data/<databaseName>.sqlite.
+     */
+    static createDb(databaseName) {
+        return new SqliteDb(databaseName, true);
+    }
+
+    /**
+     * Connect to the database.
+     * @param {string} databaseName The name of database, which is stored in file data/<databaseName>.sqlite.
+     */
+     static connectDb(databaseName) {
+        return new SqliteDb(databaseName, false);
+    }
+
+    /**
+     * Close connection to the database.
+     */
+    closeDb() {
         // Close the database connection
         this.db.close((err) => {
             if (err) {
@@ -55,6 +99,10 @@ class SqliteDb {
         });
     }
 
+    /**
+     * List a database table to console.
+     * @param {string} tableName
+     */
     listTable(tableName) {
         this.db.all(`SELECT * FROM ${tableName}`, function(err, rows) {
             if (err) {
