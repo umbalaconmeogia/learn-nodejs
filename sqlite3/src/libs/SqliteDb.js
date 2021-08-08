@@ -107,12 +107,15 @@ class SqliteDb {
      * @param {string} tableName
      */
     listTable(tableName) {
-        this.db.all(`SELECT * FROM ${tableName}`, function(err, rows) {
-            if (err) {
-                console.error(err.message);
-            }
-            console.log(`Table "${tableName}"`);
-            console.table(rows);
+        return new Promise((resolve, reject) => {
+            this.db.all(`SELECT * FROM ${tableName}`, function(err, rows) {
+                if (err) {
+                    console.error(err.message);
+                }
+                console.log(`Table "${tableName}"`);
+                console.table(rows);
+                resolve();
+            });
         });
     }
 }

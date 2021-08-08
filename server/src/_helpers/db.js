@@ -1,6 +1,9 @@
 const { Sequelize } = require('sequelize');
+const fs = require('fs');
 
-module.exports = db = {};
+module.exports = db = {
+    resetDatabase,
+};
 
 initialize();
 
@@ -12,11 +15,10 @@ async function initialize() {
 
     // Connect to db
     const databaseName = process.env.USER_POST_COMMENT_DBNAME;
-    const databaseFileName = `./data/${databaseName}.sqlite`;
     console.log("db name " + databaseName);
     const sequelize = new Sequelize({
         dialect: 'sqlite',
-        storage: databaseFileName
+        storage: databaseFileName()
     });
 
 
@@ -27,4 +29,16 @@ async function initialize() {
 
     // sync all models with database
     await sequelize.sync();
+}
+
+async function resetDatabase() {
+    console.log("Delete database " + process.env.USER_POST_COMMENT_DBNAME);
+    fs.unlinkSync(databaseFileName());
+    await initialize();
+}
+
+function databaseFileName() {
+    const databaseName = process.env.USER_POST_COMMENT_DBNAME;
+    const databaseFileName = `../../common/data/${databaseName}.sqlite`;
+    return databaseFileName;
 }
