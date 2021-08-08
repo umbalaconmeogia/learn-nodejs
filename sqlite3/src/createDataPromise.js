@@ -59,6 +59,7 @@ function queryCreateUser(contentNos) {
 
 /**
  * Create a user in DB.
+ * @param {int} userId
  * @param {int[]} contentNos Array of numbers used to generate content.
  */
  function queryCreatePost(userId, contentNos) {

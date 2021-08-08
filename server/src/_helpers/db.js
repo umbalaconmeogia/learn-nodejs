@@ -1,8 +1,9 @@
-const { Sequelize } = require('sequelize');
+const { Sequelize, QueryTypes } = require('sequelize');
 const fs = require('fs');
 
 module.exports = db = {
     resetDatabase,
+    listTable,
 };
 
 initialize();
@@ -20,7 +21,7 @@ async function initialize() {
         dialect: 'sqlite',
         storage: databaseFileName()
     });
-
+    db.sequelize = sequelize;
 
     // Init models and add them to the exported db object
     db.User = require('../users/user.model')(sequelize);
@@ -32,8 +33,11 @@ async function initialize() {
 }
 
 async function resetDatabase() {
-    console.log("Delete database " + process.env.USER_POST_COMMENT_DBNAME);
-    fs.unlinkSync(databaseFileName());
+    let fileName = databaseFileName();
+    if (fs.existsSync(fileName)) {
+        console.log("Delete database " + process.env.USER_POST_COMMENT_DBNAME);
+        fs.unlinkSync(fileName);    
+    }
     await initialize();
 }
 
@@ -41,4 +45,10 @@ function databaseFileName() {
     const databaseName = process.env.USER_POST_COMMENT_DBNAME;
     const databaseFileName = `../../common/data/${databaseName}.sqlite`;
     return databaseFileName;
+}
+
+async function listTable(tableName) {
+    let items = await db.sequelize.query(`SELECT * FROM ${tableName}`, { type: QueryTypes.SELECT })
+    console.log(`Table "${tableName}"`);
+    console.table(items);
 }
