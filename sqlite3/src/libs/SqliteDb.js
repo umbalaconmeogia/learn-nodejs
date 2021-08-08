@@ -29,7 +29,7 @@ class SqliteDb {
      * @param {boolean} create Create the database or not.
      */
     constructor(databaseName, create) {
-        const databaseFileName = `./data/${databaseName}.sqlite`;
+        const databaseFileName = `../../common/data/${databaseName}.sqlite`;
 
         if (create) {
             // Delete db file
